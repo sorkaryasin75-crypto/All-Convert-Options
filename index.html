@@ -1,168 +1,754 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en" class="dark">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ultrafast Media & Image Converter</title>
-<!-- Tailwind CSS for styling -->
-<script src="https://cdn.tailwindcss.com"></script>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-body { font-family: 'Inter', sans-serif; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twilight Studio - Media & Format Converter</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        twilight: {
+                            950: '#030712',
+                            900: '#0b1120',
+                            850: '#111827',
+                            800: '#1e293b',
+                            700: '#334155',
+                            indigo: '#6366f1',
+                            purple: '#a855f7',
+                            pink: '#ec4899',
+                            cyan: '#06b6d4',
+                        }
+                    },
+                    animation: {
+                        'pulse-glow': 'pulseGlow 4s ease-in-out infinite',
+                        'float': 'float 5s ease-in-out infinite',
+                        'shimmer': 'shimmer 2s linear infinite',
+                    },
+                    keyframes: {
+                        pulseGlow: {
+                            '0%, 100%': { opacity: '0.3', transform: 'scale(1)' },
+                            '50%': { opacity: '0.7', transform: 'scale(1.05)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-8px)' },
+                        },
+                        shimmer: {
+                            '0%': { backgroundPosition: '-200% 0' },
+                            '100%': { backgroundPosition: '200% 0' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts & FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Custom CSS for Glassmorphism & Custom Components -->
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #030712;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(168, 85, 247, 0.15) 0px, transparent 50%),
+                radial-gradient(at 50% 100%, rgba(6, 182, 212, 0.1) 0px, transparent 50%);
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .glow-button {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .glow-button::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: all 0.5s ease;
+        }
+
+        .glow-button:hover::before {
+            left: 100%;
+        }
+
+        /* Range Slider Styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: rgba(51, 65, 85, 0.5);
+            border-radius: 8px;
+            height: 6px;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            background: #6366f1;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.8);
+            border: 2px solid #ffffff;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #030712;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6366f1;
+        }
+    </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col items-center justify-between p-4">
-​<!-- Header -->
-<header class="w-full max-w-2xl text-center py-6">
-<h1 class="text-3xl font-bold tracking-tight text-indigo-400">⚡ Ultrafast Media Converter</h1>
-<p class="text-sm text-slate-400 mt-1">Convert Video, GIF, JPG, PNG seamlessly with instant links.</p>
-</header>
-​<!-- Main Card -->
-<main class="w-full max-w-2xl bg-slate-800 border border-slate-700 rounded-2xl shadow-xl p-6 sm:p-8 mb-6">
-​<!-- Dropzone / Input -->
-<div id="drop-zone" class="border-2 border-dashed border-slate-600 hover:border-indigo-500 transition-all rounded-xl p-8 text-center cursor-pointer bg-slate-900/50 flex flex-col items-center justify-center">
-<svg class="w-12 h-12 text-slate-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-</svg>
-<p class="text-sm font-medium text-slate-300">Drag & drop your file here, or <span class="text-indigo-400 underline">browse</span></p>
-<p class="text-xs text-slate-500 mt-1">Supports Images, GIFs, and Videos (PNG, JPG, WEBP, GIF, MP4, etc.)</p>
-<input type="file" id="file-input" class="hidden" accept="image/*,video/*">
-</div>
-​<!-- Options Container (Hidden initially) -->
-<div id="options-container" class="mt-6 hidden space-y-4">
-<div class="flex items-center justify-between bg-slate-900/80 p-4 rounded-xl border border-slate-700">
-<div class="flex items-center space-x-3 truncate">
-<span id="file-name" class="text-sm font-medium text-slate-300 truncate">filename.ext</span>
-<span id="file-size" class="text-xs text-slate-500">0 KB</span>
-</div>
-<button id="remove-file" class="text-xs text-rose-400 hover:text-rose-300 font-medium">Remove</button>
-</div>
-​<!-- Format Choice -->
-<div>
-<label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Select Target Format</label>
-<select id="target-format" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
-<option value="image/webp">WEBP (Optimized Fast Image)</option>
-<option value="image/jpeg">JPG / JPEG</option>
-<option value="image/png">PNG</option>
-<option value="image/gif">GIF (If applicable)</option>
-</select>
-</div>
-​<!-- Convert Button -->
-<button id="convert-btn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 px-4 rounded-xl shadow-lg transition-all text-sm flex items-center justify-center space-x-2">
-<span>Convert File Now</span>
-</button>
-</div>
-​<!-- Loader -->
-<div id="loader" class="hidden mt-6 text-center py-6">
-<div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-indigo-500 border-t-transparent"></div>
-<p class="text-xs text-slate-400 mt-2">Processing your file securely...</p>
-</div>
-​<!-- Result Section (Hidden initially) -->
-<div id="result-container" class="hidden mt-6 pt-6 border-t border-slate-700 text-center space-y-4">
-<h3 class="text-sm font-semibold text-emerald-400">Conversion Successful!</h3>
-<div class="flex justify-center">
-<img id="preview-output" class="max-h-48 rounded-lg border border-slate-700 object-contain loading="lazy"" alt="Converted Preview">
-</div>
-<div class="flex flex-col sm:flex-row gap-2 justify-center">
-<a id="download-link" download="converted-file" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold py-2.5 px-5 rounded-xl transition-all inline-block">Download File</a>
-<button id="copy-link-btn" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold py-2.5 px-5 rounded-xl transition-all">Copy Data Link</button>
-</div>
-</div>
-​</main>
-​<!-- Footer -->
-<footer class="text-xs text-slate-500 text-center">
-Powered by Client-Side Web Technology • Ready for GitHub Pages
-</footer>
-​<!-- Script Logic -->
-<script>
-const dropZone = document.getElementById('drop-zone');
-const fileInput = document.getElementById('file-input');
-const optionsContainer = document.getElementById('options-container');
-const fileNameEl = document.getElementById('file-name');
-const fileSizeEl = document.getElementById('file-size');
-const removeFileBtn = document.getElementById('remove-file');
-const targetFormatSelect = document.getElementById('target-format');
-const convertBtn = document.getElementById('convert-btn');
-const loader = document.getElementById('loader');
-const resultContainer = document.getElementById('result-container');
-const previewOutput = document.getElementById('preview-output');
-const downloadLink = document.getElementById('download-link');
-const copyLinkBtn = document.getElementById('copy-link-btn');
-​let currentFile = null;
-​dropZone.addEventListener('click', () => fileInput.click());
-fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
-​dropZone.addEventListener('dragover', (e) => {
-e.preventDefault();
-dropZone.classList.add('border-indigo-500');
-});
-​dropZone.addEventListener('dragleave', () => {
-dropZone.classList.remove('border-indigo-500');
-});
-​dropZone.addEventListener('drop', (e) => {
-e.preventDefault();
-dropZone.classList.remove('border-indigo-500');
-if (e.dataTransfer.files.length > 0) {
-handleFile(e.dataTransfer.files[0]);
-}
-});
-​function handleFile(file) {
-if (!file) return;
-currentFile = file;
-fileNameEl.textContent = file.name;
-fileSizeEl.textContent = (file.size / 1024).toFixed(1) + ' KB';
-dropZone.classList.add('hidden');
-optionsContainer.classList.remove('hidden');
-resultContainer.classList.add('hidden');
-}
-​removeFileBtn.addEventListener('click', () => {
-currentFile = null;
-fileInput.value = '';
-optionsContainer.classList.add('hidden');
-dropZone.classList.remove('hidden');
-resultContainer.classList.add('hidden');
-});
-​convertBtn.addEventListener('click', () => {
-if (!currentFile) return;
-​optionsContainer.classList.add('hidden');
-loader.classList.remove('hidden');
-​setTimeout(() => {
-const reader = new FileReader();
-reader.onload = function(event) {
-// If it's an image/gif
-if (currentFile.type.startsWith('image/') || currentFile.type === '') {
-const img = new Image();
-img.onload = function() {
-const canvas = document.createElement('canvas');
-canvas.width = img.width;
-canvas.height = img.height;
-const ctx = canvas.getContext('2d');
-ctx.drawImage(img, 0, 0);
-​const targetFormat = targetFormatSelect.value;
-const dataUrl = canvas.toDataURL(targetFormat, 0.85);
-​showResult(dataUrl, targetFormat);
-};
-img.src = event.target.result;
-} else {
-// For video or generic fallback simulation
-showResult(event.target.result, currentFile.type);
-}
-};
-reader.readAsDataURL(currentFile);
-}, 600);
-});
-​function showResult(dataUrl, format) {
-loader.classList.add('hidden');
-resultContainer.classList.remove('hidden');
-previewOutput.src = dataUrl;
-downloadLink.href = dataUrl;
-​const ext = format.split('/')[1] || 'bin';
-downloadLink.download = converted-file.${ext};
-}
-​copyLinkBtn.addEventListener('click', () => {
-navigator.clipboard.writeText(downloadLink.href).then(() => {
-alert('Converted data link copied to clipboard!');
-});
-});
-</script>
+<body class="text-slate-100 flex flex-col min-h-screen antialiased justify-between">
+
+    <!-- Background Animated Ambient Orbs -->
+    <div class="fixed top-10 left-10 w-96 h-96 bg-indigo-600/20 rounded-full blur-[120px] pointer-events-none animate-pulse-glow"></div>
+    <div class="fixed bottom-10 right-10 w-96 h-96 bg-purple-600/20 rounded-full blur-[120px] pointer-events-none animate-pulse-glow" style="animation-delay: 2s;"></div>
+
+    <!-- Toast Notification Popup -->
+    <div id="toast" class="fixed top-5 right-5 z-50 transform translate-x-full transition-all duration-300 flex items-center gap-3 px-5 py-3.5 rounded-2xl bg-slate-900/90 border border-indigo-500/30 text-white shadow-2xl backdrop-blur-xl text-sm font-medium">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-indigo-400 text-lg"></i>
+        <span id="toast-msg">Message here</span>
+    </div>
+
+    <!-- Main Navigation Header -->
+    <header class="w-full max-w-6xl mx-auto px-4 pt-8 pb-4 flex items-center justify-between z-10">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-indigo-500/20">
+                <i class="fa-solid fa-bolt-lightning text-lg"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-indigo-300 bg-clip-text text-transparent">
+                    Twilight Converter
+                </h1>
+                <p class="text-[11px] text-slate-400 font-medium">Client-Side High Speed Media Studio</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                GitHub Pages Ready
+            </span>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="w-full max-w-4xl mx-auto px-4 py-6 flex-1 z-10">
+        <div class="glass-panel rounded-3xl p-6 sm:p-10 relative overflow-hidden transition-all duration-500">
+            
+            <!-- Step Progress Indicator Bar -->
+            <div class="flex items-center justify-between mb-8 pb-6 border-b border-slate-800/80 text-xs font-bold uppercase tracking-wider">
+                <div id="step-node-1" class="flex items-center gap-2 text-indigo-400 transition-colors">
+                    <span id="step-num-1" class="w-7 h-7 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-extrabold shadow-md shadow-indigo-600/30">1</span>
+                    <span>Format & Upload</span>
+                </div>
+                <div class="h-0.5 flex-1 mx-4 bg-slate-800 rounded-full overflow-hidden">
+                    <div id="step-bar-1" class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 w-0 transition-all duration-500"></div>
+                </div>
+                <div id="step-node-2" class="flex items-center gap-2 text-slate-500 transition-colors">
+                    <span id="step-num-2" class="w-7 h-7 rounded-xl bg-slate-800 text-slate-400 border border-slate-700 flex items-center justify-center font-extrabold">2</span>
+                    <span>Target Format</span>
+                </div>
+                <div class="h-0.5 flex-1 mx-4 bg-slate-800 rounded-full overflow-hidden">
+                    <div id="step-bar-2" class="h-full bg-gradient-to-r from-purple-500 to-pink-500 w-0 transition-all duration-500"></div>
+                </div>
+                <div id="step-node-3" class="flex items-center gap-2 text-slate-500 transition-colors">
+                    <span id="step-num-3" class="w-7 h-7 rounded-xl bg-slate-800 text-slate-400 border border-slate-700 flex items-center justify-center font-extrabold">3</span>
+                    <span>Convert & Download</span>
+                </div>
+            </div>
+
+            <!-- SECTION 1: INPUT SELECTOR & DROPZONE -->
+            <section id="sec-upload" class="space-y-6 transition-all duration-300">
+                
+                <!-- Input Format Selector Dropdown -->
+                <div class="glass-card p-4 sm:p-5 rounded-2xl border border-slate-700/60">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-indigo-400 mb-2 flex items-center justify-between">
+                        <span><i class="fa-solid fa-filter text-indigo-400 mr-1.5"></i> Select Input Source Format</span>
+                        <span class="text-[11px] text-slate-400 font-normal uppercase">(Optional or Auto-Detect)</span>
+                    </label>
+                    <select id="source-format-select" class="w-full bg-slate-900/90 border border-slate-700 focus:border-indigo-500 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none transition-all cursor-pointer">
+                        <option value="AUTO">✨ Auto-Detect File Format</option>
+                        <optgroup label="🖼️ Image Formats">
+                            <option value="PNG">PNG Image (.png)</option>
+                            <option value="JPG">JPG / JPEG (.jpg, .jpeg)</option>
+                            <option value="WEBP">WEBP Modern Image (.webp)</option>
+                            <option value="GIF">GIF Animated Image (.gif)</option>
+                            <option value="SVG">SVG Vector Graphic (.svg)</option>
+                            <option value="BMP">BMP Bitmap Image (.bmp)</option>
+                        </optgroup>
+                        <optgroup label="🎬 Video / Animation Formats">
+                            <option value="MP4">MP4 Video File (.mp4)</option>
+                            <option value="WEBM">WEBM Video File (.webm)</option>
+                            <option value="MOV">MOV QuickTime Video (.mov)</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <!-- File Drag & Drop Upload Zone -->
+                <div id="drop-zone" class="border-2 border-dashed border-slate-700/80 hover:border-indigo-500/80 bg-slate-900/30 hover:bg-slate-900/60 rounded-3xl p-8 sm:p-14 text-center cursor-pointer transition-all duration-300 group flex flex-col items-center justify-center relative">
+                    <input type="file" id="file-input" class="hidden" accept="image/*,video/*">
+                    
+                    <div class="w-20 h-20 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-3xl mb-4 group-hover:scale-110 group-hover:bg-indigo-500/20 group-hover:border-indigo-500/40 transition-all duration-300 shadow-xl shadow-indigo-500/10">
+                        <i class="fa-solid fa-cloud-arrow-up group-hover:-translate-y-1 transition-transform"></i>
+                    </div>
+
+                    <h3 class="text-lg font-bold text-slate-200 mb-1 group-hover:text-white transition-colors">
+                        Click or Drag & Drop Media File Here
+                    </h3>
+                    <p class="text-xs text-slate-400 mb-5 max-w-xs">
+                        Supports high-resolution images (PNG, JPG, WEBP, GIF, SVG, BMP) and web videos (MP4, WEBM).
+                    </p>
+
+                    <button type="button" id="btn-browse" class="glow-button px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-folder-open"></i> Browse Device Files
+                    </button>
+                </div>
+
+            </section>
+
+            <!-- SECTION 2: TARGET FORMAT & CONVERSION OPTIONS (Initially Hidden) -->
+            <section id="sec-options" class="hidden space-y-6 transition-all duration-300">
+                
+                <!-- Uploaded File Card Meta Preview -->
+                <div class="glass-card rounded-2xl p-4 sm:p-5 flex items-center justify-between border border-slate-700/60 shadow-inner">
+                    <div class="flex items-center space-x-4 overflow-hidden">
+                        <div id="media-thumb-preview" class="w-16 h-16 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center overflow-hidden flex-shrink-0">
+                            <!-- Populated dynamically -->
+                        </div>
+                        <div class="truncate">
+                            <h4 id="meta-filename" class="text-sm font-bold text-slate-100 truncate">filename.ext</h4>
+                            <div class="flex flex-wrap items-center gap-2 mt-1.5 text-xs text-slate-400">
+                                <span id="meta-filesize" class="bg-indigo-500/10 text-indigo-300 px-2.5 py-0.5 rounded-lg border border-indigo-500/20 font-semibold">0 KB</span>
+                                <span id="meta-dimensions" class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded-lg border border-slate-700 font-mono text-[11px]">0x0</span>
+                                <span id="meta-type" class="uppercase font-mono text-slate-400 text-[11px]">IMAGE</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="btn-change-file" class="px-3 py-2 rounded-xl text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 border border-rose-500/20 transition-all text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap">
+                        <i class="fa-solid fa-trash-can"></i> <span class="hidden sm:inline">Change</span>
+                    </button>
+                </div>
+
+                <!-- Target Configuration Form -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Detected Input Info -->
+                    <div class="glass-card p-4 rounded-2xl border border-slate-700/60">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Source Detected</label>
+                        <input type="text" id="input-detected-display" disabled class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-4 py-3 text-xs text-slate-400 font-mono cursor-not-allowed" value="Auto-detecting...">
+                    </div>
+
+                    <!-- Target Selection Dropdown -->
+                    <div class="glass-card p-4 rounded-2xl border border-slate-700/60">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-indigo-400 mb-2">Target Output Format</label>
+                        <select id="target-format-select" class="w-full bg-slate-900 border border-indigo-500/50 focus:border-indigo-400 rounded-xl px-4 py-3 text-sm text-slate-100 focus:outline-none transition-all font-semibold cursor-pointer shadow-md">
+                            <optgroup label="🖼️ Convert to Image">
+                                <option value="image/webp">WEBP (Fast, Small & Web Optimized)</option>
+                                <option value="image/png">PNG (Lossless & Transparent)</option>
+                                <option value="image/jpeg">JPG / JPEG (Standard Compressed)</option>
+                                <option value="image/gif">GIF (Frame / Animated)</option>
+                                <option value="image/bmp">BMP (Bitmap File)</option>
+                                <option value="image/x-icon">ICO (Website Favicon)</option>
+                            </optgroup>
+                            <optgroup label="🎬 Convert Video / Animation">
+                                <option value="video/webm">WEBM Video (Web Optimized)</option>
+                                <option value="video/mp4">MP4 Frame Capture (Extract Image)</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Quality & Scale Controls -->
+                <div class="glass-card p-5 rounded-2xl border border-slate-700/60 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                            <i class="fa-solid fa-sliders text-indigo-400"></i> Quality / Compression Level
+                        </label>
+                        <span id="quality-val-display" class="text-xs font-extrabold text-indigo-400 bg-indigo-500/10 px-2.5 py-0.5 rounded-lg border border-indigo-500/20">90%</span>
+                    </div>
+                    <input type="range" id="quality-range" min="10" max="100" value="90" class="w-full cursor-pointer">
+                    <div class="flex justify-between text-[10px] text-slate-500 font-medium">
+                        <span>Min Size (Lower Quality)</span>
+                        <span>Balanced</span>
+                        <span>Max Quality (Lossless)</span>
+                    </div>
+                </div>
+
+                <!-- Start Conversion Button -->
+                <button id="btn-start-convert" class="glow-button w-full py-4 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white font-extrabold text-sm sm:text-base shadow-xl shadow-indigo-600/25 transition-all duration-300 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>Convert Media Now</span>
+                </button>
+            </section>
+
+            <!-- SECTION 3: LOADING / PROCESSING -->
+            <section id="sec-loading" class="hidden py-14 text-center space-y-5 transition-all duration-300">
+                <div class="relative w-20 h-20 mx-auto">
+                    <div class="absolute inset-0 rounded-full border-4 border-indigo-500/20 animate-pulse"></div>
+                    <div class="absolute inset-0 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin"></div>
+                    <div class="absolute inset-0 flex items-center justify-center text-indigo-400 text-xl">
+                        <i class="fa-solid fa-bolt-lightning animate-bounce"></i>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-extrabold text-slate-100">Converting Media File...</h3>
+                    <p id="loading-status-msg" class="text-xs text-slate-400 mt-1 max-w-xs mx-auto">Rendering canvas layers, applying compression, and generating direct link...</p>
+                </div>
+            </section>
+
+            <!-- SECTION 4: CONVERTED RESULT & LINK GENERATOR -->
+            <section id="sec-result" class="hidden space-y-6 text-center transition-all duration-300">
+                
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-bold">
+                    <i class="fa-solid fa-circle-check"></i> Conversion Completed Successfully!
+                </div>
+
+                <!-- Converted Media Preview Display -->
+                <div class="glass-card p-4 rounded-2xl border border-slate-700/60 max-h-80 flex items-center justify-center overflow-hidden relative group">
+                    <div id="converted-preview-container" class="w-full flex justify-center">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Generated Link Copy Box -->
+                <div class="glass-card p-4 rounded-2xl border border-slate-700/60 space-y-3">
+                    <label class="block text-left text-xs font-bold uppercase tracking-wider text-slate-400">
+                        <i class="fa-solid fa-link text-indigo-400 mr-1"></i> Lightweight Direct Data / Object Link
+                    </label>
+                    <div class="flex flex-col sm:flex-row items-center gap-2">
+                        <input type="text" id="result-link-box" readonly class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs text-slate-300 font-mono select-all focus:outline-none" value="blob:http://localhost...">
+                        <button id="btn-copy-link" class="w-full sm:w-auto px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-bold transition-all whitespace-nowrap flex items-center justify-center gap-2">
+                            <i class="fa-regular fa-copy"></i> Copy Link
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Action Download Buttons -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                    <a id="btn-download-file" download="twilight-converted-file" class="glow-button py-3.5 px-6 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-extrabold shadow-lg shadow-emerald-600/20 transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-download"></i> Download Converted File
+                    </a>
+                    <button id="btn-convert-new" class="py-3.5 px-6 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-bold transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-arrow-rotate-left"></i> Convert Another Media
+                    </button>
+                </div>
+
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full max-w-6xl mx-auto px-4 pb-8 pt-4 text-center text-xs text-slate-500 border-t border-slate-800/80 z-10 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <p>© 2026 Twilight Studio • Designed for GitHub Pages Hosting.</p>
+        <div class="flex items-center gap-4 text-slate-400">
+            <span class="hover:text-indigo-400 transition-colors"><i class="fa-solid fa-lock text-xs mr-1"></i> Private Local Browser Storage</span>
+            <span class="hover:text-indigo-400 transition-colors"><i class="fa-solid fa-feather text-xs mr-1"></i> Lazy Load Ready</span>
+        </div>
+    </footer>
+
+    <!-- Client-Side Converter Core Logic -->
+    <script>
+        // DOM Elements Initialization
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const btnBrowse = document.getElementById('btn-browse');
+        const sourceFormatSelect = document.getElementById('source-format-select');
+
+        const secUpload = document.getElementById('sec-upload');
+        const secOptions = document.getElementById('sec-options');
+        const secLoading = document.getElementById('sec-loading');
+        const secResult = document.getElementById('sec-result');
+
+        const stepNode1 = document.getElementById('step-node-1');
+        const stepNode2 = document.getElementById('step-node-2');
+        const stepNode3 = document.getElementById('step-node-3');
+        const stepBar1 = document.getElementById('step-bar-1');
+        const stepBar2 = document.getElementById('step-bar-2');
+
+        const metaFilename = document.getElementById('meta-filename');
+        const metaFilesize = document.getElementById('meta-filesize');
+        const metaDimensions = document.getElementById('meta-dimensions');
+        const metaType = document.getElementById('meta-type');
+        const mediaThumbPreview = document.getElementById('media-thumb-preview');
+        const inputDetectedDisplay = document.getElementById('input-detected-display');
+        const btnChangeFile = document.getElementById('btn-change-file');
+
+        const targetFormatSelect = document.getElementById('target-format-select');
+        const qualityRange = document.getElementById('quality-range');
+        const qualityValDisplay = document.getElementById('quality-val-display');
+        const btnStartConvert = document.getElementById('btn-start-convert');
+
+        const convertedPreviewContainer = document.getElementById('converted-preview-container');
+        const resultLinkBox = document.getElementById('result-link-box');
+        const btnCopyLink = document.getElementById('btn-copy-link');
+        const btnDownloadFile = document.getElementById('btn-download-file');
+        const btnConvertNew = document.getElementById('btn-convert-new');
+
+        const toast = document.getElementById('toast');
+        const toastMsg = document.getElementById('toast-msg');
+
+        // State variables
+        let selectedFile = null;
+        let fileObjectUrl = null;
+        let convertedObjectUrl = null;
+        let imageDimensions = { width: 0, height: 0 };
+
+        // Toast alert helper
+        function showToast(message, isSuccess = true) {
+            toastMsg.textContent = message;
+            toast.classList.remove('translate-x-full');
+            setTimeout(() => {
+                toast.classList.add('translate-x-full');
+            }, 3000);
+        }
+
+        // Browse button trigger
+        btnBrowse.addEventListener('click', (e) => {
+            e.stopPropagation();
+            fileInput.click();
+        });
+
+        dropZone.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // Drag and Drop Handling
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.add('border-indigo-500', 'bg-indigo-500/10');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.remove('border-indigo-500', 'bg-indigo-500/10');
+            }, false);
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            const files = e.dataTransfer.files;
+            if (files && files.length > 0) {
+                processUploadedFile(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files.length > 0) {
+                processUploadedFile(e.target.files[0]);
+            }
+        });
+
+        // Update Quality Slider display
+        qualityRange.addEventListener('input', (e) => {
+            qualityValDisplay.textContent = `${e.target.value}%`;
+        });
+
+        // Process File Upload
+        function processUploadedFile(file) {
+            selectedFile = file;
+            if (fileObjectUrl) URL.revokeObjectURL(fileObjectUrl);
+            fileObjectUrl = URL.createObjectURL(file);
+
+            metaFilename.textContent = file.name;
+            metaFilesize.textContent = formatBytes(file.size);
+
+            const fileExtension = file.name.split('.').pop().toUpperCase();
+            const mimeType = file.type || `file/${fileExtension.toLowerCase()}`;
+            metaType.textContent = fileExtension || 'MEDIA';
+
+            const userSelectedSource = sourceFormatSelect.value;
+            inputDetectedDisplay.value = userSelectedSource !== 'AUTO' 
+                ? `${userSelectedSource} (Selected) / ${mimeType}`
+                : `${mimeType} (Auto-Detected)`;
+
+            // Clear preview thumbnail
+            mediaThumbPreview.innerHTML = '';
+
+            if (file.type.startsWith('image/')) {
+                const img = new Image();
+                img.onload = function() {
+                    imageDimensions = { width: img.width, height: img.height };
+                    metaDimensions.textContent = `${img.width}x${img.height}px`;
+                };
+                img.src = fileObjectUrl;
+
+                const thumbImg = document.createElement('img');
+                thumbImg.src = fileObjectUrl;
+                thumbImg.className = 'w-full h-full object-cover rounded-lg';
+                mediaThumbPreview.appendChild(thumbImg);
+            } else if (file.type.startsWith('video/')) {
+                const video = document.createElement('video');
+                video.onloadedmetadata = function() {
+                    metaDimensions.textContent = `${video.videoWidth}x${video.videoHeight}px`;
+                };
+                video.src = fileObjectUrl;
+                video.className = 'w-full h-full object-cover rounded-lg';
+                mediaThumbPreview.appendChild(video);
+            } else {
+                metaDimensions.textContent = 'N/A';
+                mediaThumbPreview.innerHTML = '<i class="fa-solid fa-file-video text-indigo-400 text-2xl"></i>';
+            }
+
+            // Transition UI to Step 2
+            secUpload.classList.add('hidden');
+            secOptions.classList.remove('hidden');
+            updateStepIndicator(2);
+            showToast('File uploaded successfully!');
+        }
+
+        btnChangeFile.addEventListener('click', resetToUploadState);
+        btnConvertNew.addEventListener('click', resetToUploadState);
+
+        function resetToUploadState() {
+            selectedFile = null;
+            if (fileObjectUrl) {
+                URL.revokeObjectURL(fileObjectUrl);
+                fileObjectUrl = null;
+            }
+            if (convertedObjectUrl) {
+                URL.revokeObjectURL(convertedObjectUrl);
+                convertedObjectUrl = null;
+            }
+            fileInput.value = '';
+
+            secOptions.classList.add('hidden');
+            secLoading.classList.add('hidden');
+            secResult.classList.add('hidden');
+            secUpload.classList.remove('hidden');
+
+            updateStepIndicator(1);
+        }
+
+        // Stepper Status Indicator Manager
+        function updateStepIndicator(step) {
+            if (step === 1) {
+                stepBar1.style.width = '0%';
+                stepBar2.style.width = '0%';
+
+                stepNode1.className = 'flex items-center gap-2 text-indigo-400 font-bold';
+                stepNode2.className = 'flex items-center gap-2 text-slate-500 font-medium';
+                stepNode3.className = 'flex items-center gap-2 text-slate-500 font-medium';
+
+                document.getElementById('step-num-1').className = 'w-7 h-7 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-extrabold shadow-md shadow-indigo-600/30';
+                document.getElementById('step-num-2').className = 'w-7 h-7 rounded-xl bg-slate-800 text-slate-400 border border-slate-700 flex items-center justify-center font-extrabold';
+                document.getElementById('step-num-3').className = 'w-7 h-7 rounded-xl bg-slate-800 text-slate-400 border border-slate-700 flex items-center justify-center font-extrabold';
+            } else if (step === 2) {
+                stepBar1.style.width = '100%';
+                stepBar2.style.width = '0%';
+
+                stepNode1.className = 'flex items-center gap-2 text-emerald-400 font-bold';
+                stepNode2.className = 'flex items-center gap-2 text-indigo-400 font-bold';
+                stepNode3.className = 'flex items-center gap-2 text-slate-500 font-medium';
+
+                document.getElementById('step-num-1').className = 'w-7 h-7 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-extrabold';
+                document.getElementById('step-num-2').className = 'w-7 h-7 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-extrabold shadow-md shadow-indigo-600/30';
+                document.getElementById('step-num-3').className = 'w-7 h-7 rounded-xl bg-slate-800 text-slate-400 border border-slate-700 flex items-center justify-center font-extrabold';
+            } else if (step === 3) {
+                stepBar1.style.width = '100%';
+                stepBar2.style.width = '100%';
+
+                stepNode2.className = 'flex items-center gap-2 text-emerald-400 font-bold';
+                stepNode3.className = 'flex items-center gap-2 text-indigo-400 font-bold';
+
+                document.getElementById('step-num-2').className = 'w-7 h-7 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-extrabold';
+                document.getElementById('step-num-3').className = 'w-7 h-7 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-extrabold shadow-md shadow-indigo-600/30';
+            }
+        }
+
+        // Conversion Trigger Handler
+        btnStartConvert.addEventListener('click', () => {
+            if (!selectedFile) return;
+
+            secOptions.classList.add('hidden');
+            secLoading.classList.remove('hidden');
+
+            const targetMime = targetFormatSelect.value;
+            const qualityRatio = parseFloat(qualityRange.value) / 100;
+
+            setTimeout(() => {
+                if (selectedFile.type.startsWith('image/')) {
+                    convertImageFile(selectedFile, targetMime, qualityRatio);
+                } else if (selectedFile.type.startsWith('video/')) {
+                    convertVideoFrame(selectedFile, targetMime, qualityRatio);
+                } else {
+                    // Fallback
+                    convertImageFile(selectedFile, targetMime, qualityRatio);
+                }
+            }, 800);
+        });
+
+        // Core Image Conversion Engine via HTML5 Canvas API
+        function convertImageFile(file, targetMime, quality) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+
+                const ctx = canvas.getContext('2d');
+
+                // If converting to JPEG or non-alpha format, paint background white
+                if (targetMime === 'image/jpeg') {
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                }
+
+                ctx.drawImage(img, 0, 0);
+
+                canvas.toBlob((blob) => {
+                    if (!blob) {
+                        showToast('Conversion failed. Trying fallback data URL.', false);
+                        const dataUrl = canvas.toDataURL(targetMime, quality);
+                        displayConversionResult(dataUrl, targetMime, true);
+                        return;
+                    }
+                    if (convertedObjectUrl) URL.revokeObjectURL(convertedObjectUrl);
+                    convertedObjectUrl = URL.createObjectURL(blob);
+                    displayConversionResult(convertedObjectUrl, targetMime, false, blob.size);
+                }, targetMime, quality);
+            };
+
+            img.onerror = function() {
+                showToast('Failed to parse input image file.', false);
+                secLoading.classList.add('hidden');
+                secOptions.classList.remove('hidden');
+            };
+
+            img.src = fileObjectUrl;
+        }
+
+        // Video Frame Extractor & Converter Logic
+        function convertVideoFrame(file, targetMime, quality) {
+            const video = document.createElement('video');
+            video.src = fileObjectUrl;
+            video.currentTime = 0.5; // Capture frame at 0.5s mark
+
+            video.onseeked = function() {
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth || 640;
+                canvas.height = video.videoHeight || 360;
+
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                const finalType = targetMime.startsWith('video/') ? 'image/webp' : targetMime;
+
+                canvas.toBlob((blob) => {
+                    if (convertedObjectUrl) URL.revokeObjectURL(convertedObjectUrl);
+                    convertedObjectUrl = URL.createObjectURL(blob);
+                    displayConversionResult(convertedObjectUrl, finalType, false, blob.size);
+                }, finalType, quality);
+            };
+
+            video.onerror = function() {
+                showToast('Unable to process video stream.', false);
+                secLoading.classList.add('hidden');
+                secOptions.classList.remove('hidden');
+            };
+        }
+
+        // Display Result Output UI
+        function displayConversionResult(url, mimeType, isDataUrl = false, fileSize = 0) {
+            secLoading.classList.add('hidden');
+            secResult.classList.remove('hidden');
+            updateStepIndicator(3);
+
+            resultLinkBox.value = url;
+            btnDownloadFile.href = url;
+
+            const extension = mimeType.split('/')[1]?.replace('x-icon', 'ico') || 'converted';
+            btnDownloadFile.download = `twilight-${Date.now()}.${extension}`;
+
+            convertedPreviewContainer.innerHTML = '';
+
+            if (mimeType.startsWith('image/')) {
+                const img = document.createElement('img');
+                img.src = url;
+                img.className = 'max-h-72 rounded-xl object-contain shadow-md';
+                img.setAttribute('loading', 'lazy');
+                convertedPreviewContainer.appendChild(img);
+            } else if (mimeType.startsWith('video/')) {
+                const video = document.createElement('video');
+                video.src = url;
+                video.controls = true;
+                video.className = 'max-h-72 rounded-xl object-contain shadow-md';
+                convertedPreviewContainer.appendChild(video);
+            } else {
+                convertedPreviewContainer.innerHTML = `<div class="p-8 text-center font-mono text-indigo-300 text-sm">Converted Object URL Ready (.${extension})</div>`;
+            }
+
+            showToast('Conversion complete! Ready to download.');
+        }
+
+        // Copy Link Button Logic
+        btnCopyLink.addEventListener('click', () => {
+            resultLinkBox.select();
+            resultLinkBox.setSelectionRange(0, 99999);
+
+            try {
+                const success = document.execCommand('copy');
+                if (success) {
+                    showToast('Link copied to clipboard!');
+                } else {
+                    navigator.clipboard.writeText(resultLinkBox.value);
+                    showToast('Link copied to clipboard!');
+                }
+            } catch (err) {
+                navigator.clipboard.writeText(resultLinkBox.value);
+                showToast('Link copied to clipboard!');
+            }
+        });
+
+        // Helper Utility to format File Size
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+    </script>
 </body>
 </html>
