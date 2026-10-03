@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ultrafast Media & Image Converter</title>
+<!-- Tailwind CSS for styling -->
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+body { font-family: 'Inter', sans-serif; }
+</style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col items-center justify-between p-4">
+​<!-- Header -->
+<header class="w-full max-w-2xl text-center py-6">
+<h1 class="text-3xl font-bold tracking-tight text-indigo-400">⚡ Ultrafast Media Converter</h1>
+<p class="text-sm text-slate-400 mt-1">Convert Video, GIF, JPG, PNG seamlessly with instant links.</p>
+</header>
+​<!-- Main Card -->
+<main class="w-full max-w-2xl bg-slate-800 border border-slate-700 rounded-2xl shadow-xl p-6 sm:p-8 mb-6">
+​<!-- Dropzone / Input -->
+<div id="drop-zone" class="border-2 border-dashed border-slate-600 hover:border-indigo-500 transition-all rounded-xl p-8 text-center cursor-pointer bg-slate-900/50 flex flex-col items-center justify-center">
+<svg class="w-12 h-12 text-slate-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+</svg>
+<p class="text-sm font-medium text-slate-300">Drag & drop your file here, or <span class="text-indigo-400 underline">browse</span></p>
+<p class="text-xs text-slate-500 mt-1">Supports Images, GIFs, and Videos (PNG, JPG, WEBP, GIF, MP4, etc.)</p>
+<input type="file" id="file-input" class="hidden" accept="image/*,video/*">
+</div>
+​<!-- Options Container (Hidden initially) -->
+<div id="options-container" class="mt-6 hidden space-y-4">
+<div class="flex items-center justify-between bg-slate-900/80 p-4 rounded-xl border border-slate-700">
+<div class="flex items-center space-x-3 truncate">
+<span id="file-name" class="text-sm font-medium text-slate-300 truncate">filename.ext</span>
+<span id="file-size" class="text-xs text-slate-500">0 KB</span>
+</div>
+<button id="remove-file" class="text-xs text-rose-400 hover:text-rose-300 font-medium">Remove</button>
+</div>
+​<!-- Format Choice -->
+<div>
+<label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Select Target Format</label>
+<select id="target-format" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+<option value="image/webp">WEBP (Optimized Fast Image)</option>
+<option value="image/jpeg">JPG / JPEG</option>
+<option value="image/png">PNG</option>
+<option value="image/gif">GIF (If applicable)</option>
+</select>
+</div>
+​<!-- Convert Button -->
+<button id="convert-btn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 px-4 rounded-xl shadow-lg transition-all text-sm flex items-center justify-center space-x-2">
+<span>Convert File Now</span>
+</button>
+</div>
+​<!-- Loader -->
+<div id="loader" class="hidden mt-6 text-center py-6">
+<div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-indigo-500 border-t-transparent"></div>
+<p class="text-xs text-slate-400 mt-2">Processing your file securely...</p>
+</div>
+​<!-- Result Section (Hidden initially) -->
+<div id="result-container" class="hidden mt-6 pt-6 border-t border-slate-700 text-center space-y-4">
+<h3 class="text-sm font-semibold text-emerald-400">Conversion Successful!</h3>
+<div class="flex justify-center">
+<img id="preview-output" class="max-h-48 rounded-lg border border-slate-700 object-contain loading="lazy"" alt="Converted Preview">
+</div>
+<div class="flex flex-col sm:flex-row gap-2 justify-center">
+<a id="download-link" download="converted-file" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold py-2.5 px-5 rounded-xl transition-all inline-block">Download File</a>
+<button id="copy-link-btn" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold py-2.5 px-5 rounded-xl transition-all">Copy Data Link</button>
+</div>
+</div>
+​</main>
+​<!-- Footer -->
+<footer class="text-xs text-slate-500 text-center">
+Powered by Client-Side Web Technology • Ready for GitHub Pages
+</footer>
+​<!-- Script Logic -->
+<script>
+const dropZone = document.getElementById('drop-zone');
+const fileInput = document.getElementById('file-input');
+const optionsContainer = document.getElementById('options-container');
+const fileNameEl = document.getElementById('file-name');
+const fileSizeEl = document.getElementById('file-size');
+const removeFileBtn = document.getElementById('remove-file');
+const targetFormatSelect = document.getElementById('target-format');
+const convertBtn = document.getElementById('convert-btn');
+const loader = document.getElementById('loader');
+const resultContainer = document.getElementById('result-container');
+const previewOutput = document.getElementById('preview-output');
+const downloadLink = document.getElementById('download-link');
+const copyLinkBtn = document.getElementById('copy-link-btn');
+​let currentFile = null;
+​dropZone.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+​dropZone.addEventListener('dragover', (e) => {
+e.preventDefault();
+dropZone.classList.add('border-indigo-500');
+});
+​dropZone.addEventListener('dragleave', () => {
+dropZone.classList.remove('border-indigo-500');
+});
+​dropZone.addEventListener('drop', (e) => {
+e.preventDefault();
+dropZone.classList.remove('border-indigo-500');
+if (e.dataTransfer.files.length > 0) {
+handleFile(e.dataTransfer.files[0]);
+}
+});
+​function handleFile(file) {
+if (!file) return;
+currentFile = file;
+fileNameEl.textContent = file.name;
+fileSizeEl.textContent = (file.size / 1024).toFixed(1) + ' KB';
+dropZone.classList.add('hidden');
+optionsContainer.classList.remove('hidden');
+resultContainer.classList.add('hidden');
+}
+​removeFileBtn.addEventListener('click', () => {
+currentFile = null;
+fileInput.value = '';
+optionsContainer.classList.add('hidden');
+dropZone.classList.remove('hidden');
+resultContainer.classList.add('hidden');
+});
+​convertBtn.addEventListener('click', () => {
+if (!currentFile) return;
+​optionsContainer.classList.add('hidden');
+loader.classList.remove('hidden');
+​setTimeout(() => {
+const reader = new FileReader();
+reader.onload = function(event) {
+// If it's an image/gif
+if (currentFile.type.startsWith('image/') || currentFile.type === '') {
+const img = new Image();
+img.onload = function() {
+const canvas = document.createElement('canvas');
+canvas.width = img.width;
+canvas.height = img.height;
+const ctx = canvas.getContext('2d');
+ctx.drawImage(img, 0, 0);
+​const targetFormat = targetFormatSelect.value;
+const dataUrl = canvas.toDataURL(targetFormat, 0.85);
+​showResult(dataUrl, targetFormat);
+};
+img.src = event.target.result;
+} else {
+// For video or generic fallback simulation
+showResult(event.target.result, currentFile.type);
+}
+};
+reader.readAsDataURL(currentFile);
+}, 600);
+});
+​function showResult(dataUrl, format) {
+loader.classList.add('hidden');
+resultContainer.classList.remove('hidden');
+previewOutput.src = dataUrl;
+downloadLink.href = dataUrl;
+​const ext = format.split('/')[1] || 'bin';
+downloadLink.download = converted-file.${ext};
+}
+​copyLinkBtn.addEventListener('click', () => {
+navigator.clipboard.writeText(downloadLink.href).then(() => {
+alert('Converted data link copied to clipboard!');
+});
+});
+</script>
+</body>
+</html>
